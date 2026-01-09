@@ -1,1 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>5x5 Tic Tac Toe</title>
+
+<style>
+  body {
+    background:#111;
+    color:#fff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    font-family:Arial;
+  }
+
+  .game {
+    text-align:center;
+  }
+
+  .board {
+    display:grid;
+    grid-template-columns:repeat(5, 80px);
+    gap:6px;
+    margin:20px auto;
+  }
+
+  .cell {
+    width:80px;
+    height:80px;
+    background:#222;
+    border:2px solid #555;
+    font-size:2rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+
+  .cell.taken {
+    cursor:not-allowed;
+  }
+
+  button {
+    padding:8px 18px;
+    background:#ff3333;
+    color:#fff;
+    border:none;
+    cursor:pointer;
+  }
+</style>
+</head>
+
+<body>
+<div class="game">
+  <h2>5 × 5 Tic Tac Toe</h2>
+  <div id="status">Player X's turn</div>
+  <div class="board" id="board"></div>
+  <button onclick="resetGame()">Restart</button>
+</div>
+
+<script>
+const BOARD_SIZE = 5;
+const WIN_LENGTH = 5;
+
+let currentPlayer = "X";
+let gameActive = true;
+let boardState = Array(BOARD_SIZE * BOARD_SIZE).fill("");
+
+const board = document.getElementById("board");
+const statusText = document.getElementById("status");
+
+/* ---------- BOARD CREATION ---------- */
+function createBoard() {
+  board.innerHTML = "";
+  boardState.forEach((_, index) => {
+    const cell = document.createElement("div");
+    cell.classList.add("cell");
+    cell.dataset.index = index;
+    cell.addEventListener("click", handleMove);
+    board.appendChild(cell);
+  });
+}
+
+/* ---------- MOVE HANDLER ---------- */
+function handleMove(e) {
+  const index = e.target.dataset.index;
+
+  if (!gameActive || boardState[index] !== "") return;
+
+  boardState[index] = currentPlayer;
+  e.target.textContent = currentPlayer;
+  e.target.classList.add("taken");
+
+  if (checkWin()) {
+    statusText.textContent = `Player ${currentPlayer} Wins`;
+    gameActive = false;
+    return;
+  }
+
+  if (!boardState.includes("")) {
+    statusText.textContent = "Draw";
+    gameActive = false;
+    return;
+  }
+
+  currentPlayer = currentPlayer === "X" ? "O" : "X";
+  statusText.textContent = `Player ${currentPlayer}'s turn`;
+}
+
+/* ---------- WIN LOGIC (5 IN A ROW) ---------- */
+function checkWin() {
+  const directions = [
+    [1, 0],   // Horizontal
+    [0, 1],   // Vertical
+    [1, 1],   // Diagonal \
+    [1, -1]   // Diagonal /
+  ];
+
+  for (let row = 0; row < BOARD_SIZE; row++) {
+    for (let col = 0; col < BOARD_SIZE; col++) {
+      const index = row * BOARD_SIZE + col;
+      if (boardState[index] !== currentPlayer) continue;
+
+      for (let [dx, dy] of directions) {
+        let count = 0;
+
+        for (let step = 0; step < WIN_LENGTH; step++) {
+          const r = row + step * dy;
+          const c = col + step * dx;
+
+          if (
+            r < 0 || r >= BOARD_SIZE ||
+            c < 0 || c >= BOARD_SIZE ||
+            boardState[r * BOARD_SIZE + c] !== currentPlayer
+          ) break;
+
+          count++;
+        }
+
+        if (count === WIN_LENGTH) return true;
+      }
+    }
+  }
+  return false;
+}
+
+/* ---------- RESET ---------- */
+function resetGame() {
+  currentPlayer = "X";
+  gameActive = true;
+  boardState.fill("");
+  statusText.textContent = "Player X's turn";
+  createBoard();
+}
+
+createBoard();
+</script>
+</body>
+</html>
 
