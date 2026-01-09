@@ -37,6 +37,7 @@
     color: white;
     cursor: pointer;
     font-size: 1rem;
+    margin: 5px;
   }
 
   button:hover {
@@ -51,7 +52,11 @@
   <h2>🐍 Snake Game</h2>
   <canvas id="canvas" width="400" height="400"></canvas>
   <div id="score">Score: 0</div>
+
   <button onclick="startGame()">Restart</button>
+  <button onclick="window.location.href='index.html'">
+    Go to Tic Tac Toe
+  </button>
 </div>
 
 <script>
@@ -68,7 +73,6 @@ let direction = "RIGHT";
 let score = 0;
 let gameLoop = null;
 
-/* ---------- START GAME ---------- */
 function startGame() {
   snake = [{ x: 10, y: 10 }];
   direction = "RIGHT";
@@ -80,7 +84,6 @@ function startGame() {
   gameLoop = setInterval(updateGame, 120);
 }
 
-/* ---------- RANDOM FOOD ---------- */
 function randomFood() {
   return {
     x: Math.floor(Math.random() * rows),
@@ -88,15 +91,13 @@ function randomFood() {
   };
 }
 
-/* ---------- KEYBOARD CONTROLS (FIXED) ---------- */
-window.addEventListener("keydown", function (e) {
+window.addEventListener("keydown", e => {
   if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
   else if (e.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
   else if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
   else if (e.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
 });
 
-/* ---------- GAME LOOP ---------- */
 function updateGame() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -107,7 +108,6 @@ function updateGame() {
   if (direction === "LEFT") head.x--;
   if (direction === "RIGHT") head.x++;
 
-  // Wall or self collision
   if (
     head.x < 0 || head.y < 0 ||
     head.x >= rows || head.y >= cols ||
@@ -120,7 +120,6 @@ function updateGame() {
 
   snake.unshift(head);
 
-  // Eat food
   if (head.x === food.x && head.y === food.y) {
     score++;
     document.getElementById("score").innerText = "Score: " + score;
@@ -133,10 +132,9 @@ function updateGame() {
   drawSnake();
 }
 
-/* ---------- DRAW ---------- */
 function drawSnake() {
-  snake.forEach((part, index) => {
-    ctx.fillStyle = index === 0 ? "#4caf50" : "#8bc34a";
+  snake.forEach((part, i) => {
+    ctx.fillStyle = i === 0 ? "#4caf50" : "#8bc34a";
     ctx.fillRect(part.x * box, part.y * box, box, box);
   });
 }
@@ -146,18 +144,18 @@ function drawFood() {
   ctx.fillRect(food.x * box, food.y * box, box, box);
 }
 
-/* ---------- COLLISION ---------- */
+/* ✅ FIXED COLLISION */
 function snakeCollision(head) {
-  return snake.some(segment => segment.x === head.x && segment.y === head.y);
+  for (let i = 1; i < snake.length; i++) {
+    if (head.x === snake[i].x && head.y === snake[i].y) {
+      return true;
+    }
+  }
+  return false;
 }
 
-/* ---------- INIT ---------- */
 startGame();
 </script>
 
-
-<button onclick="window.location.href='index.html'"> 
-  Go to tic tac toe
-</button>
 </body>
 </html>
